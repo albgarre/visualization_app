@@ -274,7 +274,7 @@ server <- function(input, output) {
                 `Moda` = mlv(.data[[input$target_var]], method = "naive", na.rm = TRUE),
                 `Varianza` = var(.data[[input$target_var]], na.rm = TRUE),
                 `Std. dev` = sd(.data[[input$target_var]], na.rm = TRUE),
-                IQR = quantile(.data[[input$target_var]], probs = .9, na.rm = TRUE) - quantile(.data[[input$target_var]], probs = .1, na.rm = TRUE)
+                IQR = quantile(.data[[input$target_var]], probs = .75, na.rm = TRUE) - quantile(.data[[input$target_var]], probs = .25, na.rm = TRUE)
                 )
     
   })
