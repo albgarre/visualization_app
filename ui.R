@@ -3,6 +3,12 @@ ui <- page(
   title = "visual",
   
   layout_column_wrap(
+    tags$a(href="https://github.com/albgarre/visualization_app",
+           icon("github")
+    )
+  ),
+  
+  layout_column_wrap(
     # min_height = "400px",
     width = 1/2,
     
@@ -109,5 +115,6 @@ ui <- page(
     
     tableOutput("summary_table")
   )
+  
   
 )
