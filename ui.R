@@ -12,8 +12,32 @@ ui <- page(
     # min_height = "400px",
     width = 1/2,
     
-    selectInput("dataset", label = "Dataset",
-                choices = c("mtcars", "iris", "ine")
+    layout_column_wrap(
+      width = 1,
+      radioButtons("type_data", "Source of data", 
+                   choices = list(`Example` = "example", 
+                                  `Upload` = "own")
+      ),
+      
+      conditionalPanel(
+        condition = "input.type_data == 'example'",
+        selectInput("dataset", label = "Dataset",
+                    choices = c("mtcars", "iris", "ine")
+        )
+        
+      ),
+      
+      conditionalPanel(
+        condition = "input.type_data == 'own'",
+        
+        fileInput("excel_file", "Excel file"),
+        selectInput("excel_sheet", "Sheet name", choices = c()),
+        numericInput("excel_skip", "Skip", 0)
+        
+      ),
+      
+      actionButton("update", "Update")
+      
     ),
 
     card(
@@ -98,7 +122,6 @@ ui <- page(
                        selectInput("count_y", "Y", choices = c())
       )
     ),
-    
     plotOutput("outplot")
     
   ),

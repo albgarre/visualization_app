@@ -4,6 +4,7 @@ library(bslib)
 library(tidyverse)
 library(DT)
 library(modeest)
+library(readxl)
 
 # d <- read_delim("28201(1).csv", delim = "\t") %>%
 #   mutate(Total = gsub("\\.", "", Total),

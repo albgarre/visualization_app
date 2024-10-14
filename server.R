@@ -5,20 +5,87 @@ server <- function(input, output) {
   
   my_data <- reactiveVal()
   
-  ## Update stuff when changing the dataset selector
+  # my_data <- eventReactive(input$update, {
+  # 
+  #   if (input$type_data == "example") {
+  #     
+  #     ## Get the data from the right tab
+  #     
+  #     switch(input$dataset,
+  #            Excel = excel_frame(),
+  #            Text = file_frame(),
+  #            Manual = hot_to_r(input$hot)
+  #     )
+  #     
+  #   } else {
+  #     
+  #     excel_frame()
+  #     
+  #   }
+  #   
+  #   })
   
-  observeEvent(input$dataset, {
+  ## Excel -------------------------------------------------------------------
+  
+  excelFile <- reactive({
+    # validate(need(input$excel_file, label = "Excel"))
+    input$excel_file
+  })
+  
+  observeEvent(excelFile(), {  # Update the choices
     
-    ## Update the dataset
-    
-    d <- switch(input$dataset,
-                mtcars = mtcars,
-                iris = iris,
-                ine = d_ine
+    validate(need(excelFile(), message = ""))
+    updateSelectInput(inputId = "excel_sheet",
+                      choices = excel_sheets(excelFile()$datapath) 
     )
     
-    my_data(d)
+  })
+  
+  excel_frame <- reactive({
+    read_excel(excelFile()$datapath,
+               sheet = input$excel_sheet,
+               skip = input$excel_skip,
+               col_types = "numeric")
+  })
+  
+  ## Default -------------------------------------------------------------------
+  
+
+  ## Update stuff when changing the dataset selector
+  
+  observeEvent(input$update, {
     
+    # validate(need(my_data(), message = ""))
+    
+    # browser()
+    # 
+    ## Update the dataset
+    
+    if (input$type_data == "example") {
+      
+      ## Get the data from the right tab
+      d <- switch(input$dataset,
+                  mtcars = mtcars,
+                  iris = iris,
+                  ine = d_ine
+      )
+      
+    } else {
+      
+      d <- excel_frame()
+      
+    }
+    
+    my_data(d)
+    # 
+    # d <- switch(input$dataset,
+    #             mtcars = mtcars,
+    #             iris = iris,
+    #             ine = d_ine
+    # )
+    # 
+    # d <- my_data()
+
     
     ## Update the aesthetics
     
