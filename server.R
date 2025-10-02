@@ -4,27 +4,7 @@ server <- function(input, output) {
   ## Reactive for the data
   
   my_data <- reactiveVal()
-  
-  # my_data <- eventReactive(input$update, {
-  # 
-  #   if (input$type_data == "example") {
-  #     
-  #     ## Get the data from the right tab
-  #     
-  #     switch(input$dataset,
-  #            Excel = excel_frame(),
-  #            Text = file_frame(),
-  #            Manual = hot_to_r(input$hot)
-  #     )
-  #     
-  #   } else {
-  #     
-  #     excel_frame()
-  #     
-  #   }
-  #   
-  #   })
-  
+
   ## Excel -------------------------------------------------------------------
   
   excelFile <- reactive({
@@ -77,15 +57,6 @@ server <- function(input, output) {
     }
     
     my_data(d)
-    # 
-    # d <- switch(input$dataset,
-    #             mtcars = mtcars,
-    #             iris = iris,
-    #             ine = d_ine
-    # )
-    # 
-    # d <- my_data()
-
     
     ## Update the aesthetics
     
@@ -205,6 +176,7 @@ server <- function(input, output) {
   ## Output of the table
   
   output$out_data <- renderDataTable({
+
     my_data()
   })
   
@@ -345,5 +317,105 @@ server <- function(input, output) {
                 )
     
   })
+  
+  ## Image analysis ------------------------------------------------------------
+  
+  output$raw_image <- renderDT({
+    d_image
+  })
+  
+  output$img_all <- renderPlot({
+    
+    d <- d_image %>%
+      select(R, G, B) %>%
+      as.matrix() %>%
+      recolorize:::rgb2hsl() %>%
+      as_tibble() %>%
+      select(-patch) %>%
+      bind_cols(d_image, .)
+    
+    d %>%
+      pivot_longer(-c("x", "y")) %>%
+      mutate(value = value/max(value),
+             .by = "name") %>%
+      ggplot() +
+      geom_raster(aes(y, -x, fill = value)) +
+      facet_wrap("name") +
+      scale_fill_gradient(low = "black", high = "white") +
+      geom_hline(yintercept = c(-input$min_y, -input$max_y),
+                 linetype = 2, colour = "red") +
+      geom_vline(xintercept = c(input$min_x, input$max_x),
+                 linetype = 2, colour = "red")
+    
+  })
+  
+  output$selected_img <- renderPlot({
+    
+    d <- d_image %>%
+      select(R, G, B) %>%
+      as.matrix() %>%
+      recolorize:::rgb2hsl() %>%
+      as_tibble() %>%
+      select(-patch) %>%
+      bind_cols(d_image, .)
+    
+    d %>%
+      filter(between(y, input$min_x, input$max_x),
+             between(x, input$min_y, input$max_y)
+      ) %>%
+      pivot_longer(-c("x", "y")) %>%
+      mutate(value = value/max(value),
+             .by = "name") %>%
+      ggplot() +
+      geom_raster(aes(y, -x, fill = value)) +
+      facet_wrap("name") +
+      scale_fill_gradient(low = "black", high = "white")
+    
+  })
+  
+  output$selected_boxplot <- renderPlot({
+    
+    d <- d_image %>%
+      select(R, G, B) %>%
+      as.matrix() %>%
+      recolorize:::rgb2hsl() %>%
+      as_tibble() %>%
+      select(-patch) %>%
+      bind_cols(d_image, .)
+    
+    d %>%
+      filter(between(y, input$min_x, input$max_x),
+             between(x, input$min_y, input$max_y)
+      ) %>%
+      pivot_longer(-c("x", "y")) %>%
+      mutate(value = value/max(value),
+             .by = "name") %>%
+      ggplot() +
+      geom_boxplot(aes(x = name, y = value))
+    
+  })
+  
+  output$selected_stats <- renderTable({
+    
+    d <- d_image %>%
+      select(R, G, B) %>%
+      as.matrix() %>%
+      recolorize:::rgb2hsl() %>%
+      as_tibble() %>%
+      select(-patch) %>%
+      bind_cols(d_image, .)
+    
+    d %>%
+      filter(between(y, input$min_x, input$max_x),
+             between(x, input$min_y, input$max_y)
+      ) %>%
+      pivot_longer(-c("x", "y")) %>%
+      summarize(median = median(value),
+                p10 = quantile(value, .1),
+                p90 = quantile(value, .9),
+                .by = "name")
+    
+  })
+  
   
 }

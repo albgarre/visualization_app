@@ -137,7 +137,62 @@ ui <- page(
     
     
     tableOutput("summary_table")
+  ),
+  
+  layout_column_wrap(
+    h3("Image analysis")
+  ),
+  
+  layout_column_wrap(
+    width = 1/2,
+    card_image(file = "1-s2.0-S277227592200017X-gr4.jpg",
+               height = "600px",
+               width = "800px"),
+    card(
+      card_title("Raw data"),
+      DTOutput("raw_image")
+    )
+    
+  ),
+  layout_column_wrap(
+    width = 1/2,
+    card(
+      full_screen = TRUE,
+      plotOutput("img_all")  
+    )
+  ),
+  layout_column_wrap(
+    width = 1/2,
+    
+    card(
+      numericInput("min_x", "Min X", 0),
+      numericInput("max_x", "Max X", 80),
+      numericInput("min_y", "Min Y", 0),
+      numericInput("max_y", "Max Y", 90)
+      
+    ),
+    navset_card_pill(
+      nav_panel(title = "Image",
+                plotOutput("selected_img")
+                ),
+      nav_panel(title = "Stats",
+                plotOutput("selected_boxplot"),
+                tableOutput("selected_stats")
+                )
+    )
+    
   )
   
+  # layout_column_wrap(
+  #   width = 1,
+  # 
+  #   card(
+  #     DTOutput("raw_image")
+  #   )
+  # 
+  # 
+  # )
   
 )
+
+
